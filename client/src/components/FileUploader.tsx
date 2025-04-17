@@ -33,10 +33,10 @@ const FileUploader: React.FC<FileUploaderProps> = ({ selectedFile, onFileSelecte
     
     // Check file type
     const fileType = file.name.split('.').pop()?.toLowerCase();
-    if (fileType !== 'pdf' && fileType !== 'txt') {
+    if (fileType !== 'pdf' && fileType !== 'txt' && fileType !== 'heic') {
       toast({
         title: 'Unsupported file format',
-        description: 'Please upload a PDF or TXT file.',
+        description: 'Please upload a PDF, TXT, or HEIC file.',
         variant: 'destructive',
       });
       return;
