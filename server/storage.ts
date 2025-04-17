@@ -10,6 +10,11 @@ export interface IStorage {
   createConversion(conversion: Partial<Conversion>): Promise<Conversion>;
   getConversion(id: number): Promise<Conversion | undefined>;
   updateConversionStatus(id: number, status: string, error?: string): Promise<Conversion | undefined>;
+  updateConversionMetrics(id: number, metrics: { 
+    originalFileSize?: number;
+    convertedFileSize?: number;
+    conversionTimeMs?: number;
+  }): Promise<Conversion | undefined>;
   listConversions(): Promise<Conversion[]>;
 }
 
@@ -53,9 +58,12 @@ export class MemStorage implements IStorage {
       convertedFileName: conversionData.convertedFileName || "",
       conversionType: conversionData.conversionType || "pdf-to-txt",
       status: conversionData.status || "pending",
-      filePath: conversionData.filePath || "",
-      error: conversionData.error || "",
-      createdAt: timestamp
+      filePath: conversionData.filePath || null,
+      error: conversionData.error || null,
+      createdAt: timestamp,
+      originalFileSize: conversionData.originalFileSize || null,
+      convertedFileSize: conversionData.convertedFileSize || null,
+      conversionTimeMs: conversionData.conversionTimeMs || null
     };
     
     this.conversions.set(id, conversion);
@@ -77,6 +85,26 @@ export class MemStorage implements IStorage {
       ...conversion,
       status,
       ...(error && { error })
+    };
+    
+    this.conversions.set(id, updatedConversion);
+    return updatedConversion;
+  }
+
+  async updateConversionMetrics(id: number, metrics: { 
+    originalFileSize?: number;
+    convertedFileSize?: number;
+    conversionTimeMs?: number;
+  }): Promise<Conversion | undefined> {
+    const conversion = this.conversions.get(id);
+    
+    if (!conversion) {
+      return undefined;
+    }
+    
+    const updatedConversion = {
+      ...conversion,
+      ...metrics
     };
     
     this.conversions.set(id, updatedConversion);
