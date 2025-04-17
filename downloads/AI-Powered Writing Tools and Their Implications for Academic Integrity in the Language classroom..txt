@@ -1,0 +1,5 @@
+PDF Document: AI-Powered Writing Tools and Their Implications for Academic Integrity in the Language classroom..pdf
+Page Count: 10
+
+This is extracted text from your PDF document.
+In a production environment, we would use a more robust PDF text extraction library.

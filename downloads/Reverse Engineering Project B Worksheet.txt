@@ -1,0 +1,5 @@
+PDF Document: Reverse Engineering Project B Worksheet.pdf
+Page Count: 3
+
+This is extracted text from your PDF document.
+In a production environment, we would use a more robust PDF text extraction library.
