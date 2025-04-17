@@ -5,7 +5,7 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import { PDFDocument, StandardFonts } from "pdf-lib";
-import ytdl from "ytdl-core";
+import ytdl from "@distube/ytdl-core";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 import heicConvert from "heic-convert";
@@ -203,55 +203,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid YouTube URL" });
       }
       
-      // Get video info
-      const info = await ytdl.getInfo(url);
-      const videoTitle = info.videoDetails.title.replace(/[^\w\s]/gi, '_');
-      const videoFilename = `${videoTitle}.mp4`;
-      const videoPath = path.join(downloadsDir, videoFilename);
-      
-      // Create conversion record first with pending status
-      const conversion = await storage.createConversion({
-        originalFileName: url,
-        convertedFileName: videoFilename,
-        conversionType: "youtube-to-mp4",
-        status: "pending",
-        filePath: videoPath
-      });
-      
-      // Return the ID immediately so the client can start polling
-      res.json({
-        id: conversion.id,
-        convertedFileName: videoFilename,
-        downloadUrl: `/api/download/${conversion.id}`
-      });
-      
-      // Start download process
-      const writeStream = fs.createWriteStream(videoPath);
-      
       try {
-        // Get the highest quality video format
-        const format = ytdl.chooseFormat(info.formats, { quality: 'highest' });
+        // Get video info with more robust error handling
+        const info = await ytdl.getInfo(url);
+        
+        // Create a safe filename from the video title
+        const videoTitle = info.videoDetails.title.replace(/[^\w\s]/gi, '_').substring(0, 100);
+        const timestamp = Date.now();
+        const videoFilename = `${videoTitle}_${timestamp}.mp4`;
+        const videoPath = path.join(downloadsDir, videoFilename);
+        
+        // Create conversion record first with pending status
+        const conversion = await storage.createConversion({
+          originalFileName: url,
+          convertedFileName: videoFilename,
+          conversionType: "youtube-to-mp4",
+          status: "pending",
+          filePath: videoPath
+        });
+        
+        // Return the ID immediately so the client can start polling
+        res.json({
+          id: conversion.id,
+          convertedFileName: videoFilename,
+          downloadUrl: `/api/download/${conversion.id}`
+        });
+        
+        // Start download process
+        const writeStream = fs.createWriteStream(videoPath);
+        
+        // Get the best format that includes both video and audio
+        let format = ytdl.chooseFormat(info.formats, { 
+          quality: 'highest',
+          filter: 'audioandvideo' 
+        });
+        
+        // If no combined format, use highest video quality
+        if (!format) {
+          format = ytdl.chooseFormat(info.formats, { quality: 'highest' });
+        }
         
         if (!format) {
-          // If no format is available, update status to failed
           await storage.updateConversionStatus(conversion.id, "failed", "No suitable video format found");
           return;
         }
         
-        // Download the video
-        ytdl(url, { format: format })
-          .pipe(writeStream)
-          .on('finish', async () => {
-            // Update status to completed when download is finished
-            await storage.updateConversionStatus(conversion.id, "completed");
-          })
-          .on('error', async (err) => {
-            console.error("YouTube download error:", err);
-            await storage.updateConversionStatus(conversion.id, "failed", err.message);
-          });
+        // Download the video with specific options to improve reliability
+        ytdl(url, { 
+          format: format,
+          requestOptions: {
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            }
+          }
+        })
+        .pipe(writeStream)
+        .on('finish', async () => {
+          await storage.updateConversionStatus(conversion.id, "completed");
+        })
+        .on('error', async (err) => {
+          console.error("YouTube download error:", err);
+          await storage.updateConversionStatus(conversion.id, "failed", err.message);
+        });
+        
       } catch (error) {
         console.error("YouTube format error:", error);
-        await storage.updateConversionStatus(conversion.id, "failed", "Unable to process video format");
+        res.status(500).json({ message: "Failed to process YouTube video format" });
       }
     } catch (error) {
       console.error("YouTube to MP4 conversion error:", error);
