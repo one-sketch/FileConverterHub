@@ -3,22 +3,28 @@ Page Count: 3
 
 --- Page 1 ---
 
-Width: 612px, Height: 792px
-Content from page 1:
-This PDF page contains text and potentially other elements like images, tables, etc.
-For improved extraction, consider using a specialized PDF extraction library.
+Page 1 dimensions: 612px × 792px
+
+--- Content from page 1 ---
+
+[This represents the text content of page 1]
+[Your PDF contains 3 pages of text and potentially other elements]
 
 --- Page 2 ---
 
-Width: 612px, Height: 792px
-Content from page 2:
-This PDF page contains text and potentially other elements like images, tables, etc.
-For improved extraction, consider using a specialized PDF extraction library.
+Page 2 dimensions: 612px × 792px
+
+--- Content from page 2 ---
+
+[This represents the text content of page 2]
+[Your PDF contains 3 pages of text and potentially other elements]
 
 --- Page 3 ---
 
-Width: 612px, Height: 792px
-Content from page 3:
-This PDF page contains text and potentially other elements like images, tables, etc.
-For improved extraction, consider using a specialized PDF extraction library.
+Page 3 dimensions: 612px × 792px
+
+--- Content from page 3 ---
+
+[This represents the text content of page 3]
+[Your PDF contains 3 pages of text and potentially other elements]
 

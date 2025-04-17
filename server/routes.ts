@@ -196,68 +196,85 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "YouTube URL is required" });
       }
       
-      // Validate YouTube URL format
-      const ytRegex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/;
-      if (!ytRegex.test(url)) {
-        return res.status(400).json({ message: "Invalid YouTube URL format" });
+      // Validate YouTube URL
+      if (!ytdl.validateURL(url)) {
+        return res.status(400).json({ message: "Invalid YouTube URL" });
       }
       
-      // Generate a mock video file for demo purposes
-      // In a production environment, we'd use a more robust solution
-      // or a third-party API with appropriate permissions
-      
-      // Extract video ID from URL (simplified)
-      let videoId = '';
-      if (url.includes('youtu.be/')) {
-        videoId = url.split('youtu.be/')[1].split('?')[0];
-      } else if (url.includes('youtube.com/watch?v=')) {
-        videoId = url.split('v=')[1].split('&')[0];
-      } else {
-        videoId = 'unknown';
-      }
-      
-      // Use a safe file name based on the video URL
-      const timestamp = Date.now();
-      const videoTitle = `YouTube_Video_${videoId}_${timestamp}`;
-      const videoFilename = `${videoTitle}.txt`;  // Changed to .txt for clarity
+      // Get video info
+      const info = await ytdl.getInfo(url);
+      const videoTitle = info.videoDetails.title.replace(/[^\w\s]/gi, '_');
+      const videoFilename = `${videoTitle}.mp4`;
       const videoPath = path.join(downloadsDir, videoFilename);
       
-      // Create a simple text file explaining the limitation
-      const noticeContent = `
-YouTube Video Download Notice
-
-Requested URL: ${url}
-Video ID: ${videoId}
-Timestamp: ${new Date().toISOString()}
-
-Note: Due to YouTube's terms of service and technical limitations, direct video downloads 
-are not available in this demo. In a production environment, you would need to:
-
-1. Use a properly registered and authorized API key with appropriate permissions
-2. Ensure compliance with YouTube's terms of service
-3. Consider implementing a different approach via server-side processing or use a third-party API
-      `;
-      
-      // Write the notice file
-      fs.writeFileSync(videoPath, noticeContent);
-      
-      // Store conversion record
+      // Create conversion record first with pending status
       const conversion = await storage.createConversion({
         originalFileName: url,
         convertedFileName: videoFilename,
         conversionType: "youtube-to-mp4",
-        status: "completed",
+        status: "pending",
         filePath: videoPath
       });
-
+      
+      // Return the ID immediately so the client can start polling
       res.json({
         id: conversion.id,
         convertedFileName: videoFilename,
         downloadUrl: `/api/download/${conversion.id}`
       });
+      
+      // Start download process
+      const writeStream = fs.createWriteStream(videoPath);
+      
+      try {
+        // Get the highest quality video format
+        const format = ytdl.chooseFormat(info.formats, { quality: 'highest' });
+        
+        if (!format) {
+          // If no format is available, update status to failed
+          await storage.updateConversionStatus(conversion.id, "failed", "No suitable video format found");
+          return;
+        }
+        
+        // Download the video
+        ytdl(url, { format: format })
+          .pipe(writeStream)
+          .on('finish', async () => {
+            // Update status to completed when download is finished
+            await storage.updateConversionStatus(conversion.id, "completed");
+          })
+          .on('error', async (err) => {
+            console.error("YouTube download error:", err);
+            await storage.updateConversionStatus(conversion.id, "failed", err.message);
+          });
+      } catch (error) {
+        console.error("YouTube format error:", error);
+        await storage.updateConversionStatus(conversion.id, "failed", "Unable to process video format");
+      }
     } catch (error) {
       console.error("YouTube to MP4 conversion error:", error);
       res.status(500).json({ message: "Failed to convert YouTube to MP4" });
+    }
+  });
+
+  // API endpoint to check the status of a conversion
+  app.get("/api/conversion-status/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const conversion = await storage.getConversion(id);
+      
+      if (!conversion) {
+        return res.status(404).json({ message: "Conversion not found" });
+      }
+      
+      res.json({
+        id: conversion.id,
+        status: conversion.status,
+        error: conversion.error || null
+      });
+    } catch (error) {
+      console.error("Status check error:", error);
+      res.status(500).json({ message: "Failed to check conversion status" });
     }
   });
 

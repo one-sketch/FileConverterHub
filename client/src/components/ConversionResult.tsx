@@ -24,16 +24,13 @@ const ConversionResult: React.FC<ConversionResultProps> = ({
       case 'txt-to-pdf':
         return 'Your TXT file has been converted to PDF successfully.';
       case 'youtube-to-mp4':
-        return 'Your YouTube URL request has been processed. A notice file has been generated.';
+        return 'Your YouTube video has been converted to MP4 successfully.';
       default:
         return 'Your file has been successfully converted.';
     }
   };
   
   const getButtonText = () => {
-    if (conversionType === 'youtube-to-mp4') {
-      return 'Download Notice';
-    }
     return 'Download File';
   };
 

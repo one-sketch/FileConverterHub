@@ -26,23 +26,53 @@ const Home: React.FC = () => {
   } | null>(null);
   const [errorMessage, setErrorMessage] = React.useState<string>('');
 
-  // Conversion Progress Simulation
+  // Conversion Progress Simulation and Status Polling
   React.useEffect(() => {
     let progressInterval: NodeJS.Timeout;
+    let statusPollInterval: NodeJS.Timeout;
     
     if (conversionState === 'processing') {
+      // Simulate progress for immediate feedback
       progressInterval = setInterval(() => {
         setProgress(prevProgress => {
-          const newProgress = prevProgress + Math.random() * 15;
+          const newProgress = prevProgress + Math.random() * 10;
           return newProgress >= 95 ? 95 : newProgress;
         });
       }, 500);
+      
+      // If we're processing a YouTube conversion, poll for status
+      if (conversionType === 'youtube-to-mp4' && conversionResult) {
+        statusPollInterval = setInterval(async () => {
+          try {
+            // Check the status of the conversion
+            const response = await fetch(`/api/conversion-status/${conversionResult.id}`);
+            if (response.ok) {
+              const data = await response.json();
+              
+              if (data.status === 'completed') {
+                setProgress(100);
+                setConversionState('success');
+                clearInterval(statusPollInterval);
+                clearInterval(progressInterval);
+              } else if (data.status === 'failed') {
+                setErrorMessage(data.error || 'Failed to convert YouTube to MP4');
+                setConversionState('error');
+                clearInterval(statusPollInterval);
+                clearInterval(progressInterval);
+              }
+            }
+          } catch (error) {
+            console.error("Error polling conversion status:", error);
+          }
+        }, 2000);  // Poll every 2 seconds
+      }
     }
     
     return () => {
       if (progressInterval) clearInterval(progressInterval);
+      if (statusPollInterval) clearInterval(statusPollInterval);
     };
-  }, [conversionState]);
+  }, [conversionState, conversionType, conversionResult]);
 
   // File conversion mutations
   const pdfToTxtMutation = useMutation({
