@@ -183,11 +183,13 @@ const Home: React.FC = () => {
         setConversionType('pdf-to-txt');
       } else if (file.name.toLowerCase().endsWith('.txt')) {
         setConversionType('txt-to-pdf');
+      } else if (file.name.toLowerCase().endsWith('.heic')) {
+        setConversionType('heic-to-png');
       } else {
         setConversionType(null);
         toast({
           title: 'Unsupported File Format',
-          description: 'Please upload a PDF or TXT file.',
+          description: 'Please upload a PDF, TXT, or HEIC file.',
           variant: 'destructive',
         });
       }
@@ -217,6 +219,9 @@ const Home: React.FC = () => {
       case 'youtube-to-mp4':
         youtubeToMp4Mutation.mutate();
         break;
+      case 'heic-to-png':
+        heicToPngMutation.mutate();
+        break;
       default:
         setConversionState('error');
         setErrorMessage('Please select a valid file or provide a YouTube URL');
@@ -238,10 +243,46 @@ const Home: React.FC = () => {
     setErrorMessage('');
   };
 
+  const heicToPngMutation = useMutation({
+    mutationFn: async () => {
+      if (!selectedFile) throw new Error('No file selected');
+      
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      
+      const response = await fetch('/api/convert/heic-to-png', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to convert HEIC to PNG');
+      }
+      
+      return await response.json();
+    },
+    onSuccess: (data) => {
+      setProgress(100);
+      setConversionResult(data);
+      setConversionState('success');
+    },
+    onError: (error: Error) => {
+      setErrorMessage(error.message);
+      setConversionState('error');
+      toast({
+        title: 'Conversion Failed',
+        description: error.message,
+        variant: 'destructive',
+      });
+    }
+  });
+
   const isPending = 
     pdfToTxtMutation.isPending || 
     txtToPdfMutation.isPending || 
-    youtubeToMp4Mutation.isPending;
+    youtubeToMp4Mutation.isPending ||
+    heicToPngMutation.isPending;
 
   return (
     <div className="min-h-screen flex flex-col">

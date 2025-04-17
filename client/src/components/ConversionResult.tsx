@@ -25,6 +25,8 @@ const ConversionResult: React.FC<ConversionResultProps> = ({
         return 'Your TXT file has been converted to PDF successfully.';
       case 'youtube-to-mp4':
         return 'Your YouTube video has been converted to MP4 successfully.';
+      case 'heic-to-png':
+        return 'Your HEIC image has been converted to PNG successfully.';
       default:
         return 'Your file has been successfully converted.';
     }

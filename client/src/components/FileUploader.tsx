@@ -96,7 +96,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({ selectedFile, onFileSelecte
             ref={fileInputRef}
             className="hidden" 
             onChange={handleFileChange}
-            accept=".pdf,.txt"
+            accept=".pdf,.txt,.heic"
           />
           
           <div className="mb-4">
