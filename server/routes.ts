@@ -8,6 +8,8 @@ import { PDFDocument, StandardFonts } from "pdf-lib";
 import ytdl from "ytdl-core";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
+import heicConvert from "heic-convert";
+import sharp from "sharp";
 
 // Extend Request type to include file property from multer
 interface MulterRequest extends Request {
@@ -254,6 +256,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("YouTube to MP4 conversion error:", error);
       res.status(500).json({ message: "Failed to convert YouTube to MP4" });
+    }
+  });
+
+  // HEIC to PNG conversion route
+  app.post("/api/convert/heic-to-png", upload.single("file"), async (req: MulterRequest, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      // Validate file is HEIC
+      if (!req.file.originalname.toLowerCase().endsWith(".heic")) {
+        return res.status(400).json({ message: "File must be a HEIC image" });
+      }
+
+      // Read the HEIC file
+      const heicBuffer = fs.readFileSync(req.file.path);
+      
+      // Convert HEIC to PNG
+      const pngBuffer = await heicConvert({
+        buffer: heicBuffer,
+        format: 'PNG',
+        quality: 1 // Use maximum quality
+      });
+      
+      // Create output file
+      const pngFilename = `${path.basename(req.file.originalname, ".heic")}.png`;
+      const pngPath = path.join(downloadsDir, pngFilename);
+      
+      // Save the PNG file
+      fs.writeFileSync(pngPath, pngBuffer);
+
+      // Store conversion record
+      const conversion = await storage.createConversion({
+        originalFileName: req.file.originalname,
+        convertedFileName: pngFilename,
+        conversionType: "heic-to-png",
+        status: "completed",
+        filePath: pngPath
+      });
+
+      res.json({
+        id: conversion.id,
+        convertedFileName: pngFilename,
+        downloadUrl: `/api/download/${conversion.id}`
+      });
+    } catch (error) {
+      console.error("HEIC to PNG conversion error:", error);
+      res.status(500).json({ message: "Failed to convert HEIC to PNG" });
     }
   });
 

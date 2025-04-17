@@ -38,7 +38,7 @@ export type User = typeof users.$inferSelect;
 export type InsertConversion = z.infer<typeof insertConversionSchema>;
 export type Conversion = typeof conversions.$inferSelect;
 
-export type ConversionType = "pdf-to-txt" | "txt-to-pdf" | "youtube-to-mp4";
+export type ConversionType = "pdf-to-txt" | "txt-to-pdf" | "youtube-to-mp4" | "heic-to-png";
 
 export const youtubeUrlSchema = z.object({
   url: z.string().url().refine(
