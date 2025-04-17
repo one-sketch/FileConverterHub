@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { FileText, File, Youtube } from 'lucide-react';
+import { FileText, File, Youtube, Image } from 'lucide-react';
 import { ConversionType } from '@shared/schema';
 
 interface ConversionOptionsProps {
@@ -24,6 +24,7 @@ const ConversionOptions: React.FC<ConversionOptionsProps> = ({
 }) => {
   const isPdfFile = selectedFile?.name.toLowerCase().endsWith('.pdf');
   const isTxtFile = selectedFile?.name.toLowerCase().endsWith('.txt');
+  const isHeicFile = selectedFile?.name.toLowerCase().endsWith('.heic');
   
   const isYoutubeUrlValid = youtubeUrl.trim() !== '' && 
     (youtubeUrl.includes('youtube.com') || youtubeUrl.includes('youtu.be'));
@@ -70,8 +71,28 @@ const ConversionOptions: React.FC<ConversionOptionsProps> = ({
         </CardContent>
       </Card>
 
+      {/* HEIC to PNG Conversion */}
+      <Card className="overflow-hidden transition hover:shadow-lg">
+        <CardContent className="p-6">
+          <div className="flex items-center mb-4">
+            <div className="h-12 w-12 flex items-center justify-center rounded-full bg-green-100 text-green-600">
+              <Image className="h-6 w-6" />
+            </div>
+            <h3 className="ml-4 text-lg font-semibold">HEIC to PNG</h3>
+          </div>
+          <p className="text-gray-600 mb-6">Convert iPhone/iOS HEIC images to standard PNG format.</p>
+          <Button 
+            className="w-full py-6"
+            onClick={onConvert}
+            disabled={!isHeicFile || isPending}
+          >
+            Convert to PNG
+          </Button>
+        </CardContent>
+      </Card>
+
       {/* YouTube to MP4 Conversion */}
-      <Card className="overflow-hidden transition hover:shadow-lg md:col-span-2">
+      <Card className="overflow-hidden transition hover:shadow-lg">
         <CardContent className="p-6">
           <div className="flex items-center mb-4">
             <div className="h-12 w-12 flex items-center justify-center rounded-full bg-red-100 text-red-600">
