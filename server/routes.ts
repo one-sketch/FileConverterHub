@@ -1,4 +1,4 @@
-import type { Express } from "express";
+import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import multer from "multer";
@@ -8,6 +8,11 @@ import { PDFDocument, StandardFonts } from "pdf-lib";
 import ytdl from "ytdl-core";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
+
+// Extend Request type to include file property from multer
+interface MulterRequest extends Request {
+  file?: Express.Multer.File;
+}
 
 // Create uploads directory if it doesn't exist
 const __filename = fileURLToPath(import.meta.url);
@@ -33,7 +38,7 @@ const upload = multer({
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // API routes for file conversion
-  app.post("/api/convert/pdf-to-txt", upload.single("file"), async (req, res) => {
+  app.post("/api/convert/pdf-to-txt", upload.single("file"), async (req: MulterRequest, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ message: "No file uploaded" });
@@ -81,7 +86,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/convert/txt-to-pdf", upload.single("file"), async (req, res) => {
+  app.post("/api/convert/txt-to-pdf", upload.single("file"), async (req: MulterRequest, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ message: "No file uploaded" });
