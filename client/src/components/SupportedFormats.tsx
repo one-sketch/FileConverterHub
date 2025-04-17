@@ -1,13 +1,13 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { FileText, File, Youtube } from 'lucide-react';
+import { FileText, File, Youtube, Image } from 'lucide-react';
 
 const SupportedFormats: React.FC = () => {
   return (
     <Card>
       <CardContent className="p-6">
         <h3 className="text-lg font-semibold mb-4">Supported Formats</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="p-4 bg-gray-50 rounded-lg">
             <div className="flex items-center mb-2">
               <File className="h-5 w-5 text-red-500 mr-2" />
@@ -28,6 +28,13 @@ const SupportedFormats: React.FC = () => {
               <h4 className="font-medium">YouTube</h4>
             </div>
             <p className="text-sm text-gray-600">Standard YouTube video URLs for MP4 conversion.</p>
+          </div>
+          <div className="p-4 bg-gray-50 rounded-lg">
+            <div className="flex items-center mb-2">
+              <Image className="h-5 w-5 text-green-500 mr-2" />
+              <h4 className="font-medium">HEIC</h4>
+            </div>
+            <p className="text-sm text-gray-600">iPhone/iOS HEIC images converted to PNG format.</p>
           </div>
         </div>
       </CardContent>
