@@ -12,11 +12,14 @@ export const conversions = pgTable("conversions", {
   id: serial("id").primaryKey(),
   originalFileName: text("original_file_name").notNull(),
   convertedFileName: text("converted_file_name").notNull(),
-  conversionType: text("conversion_type").notNull(), // pdf-to-txt, txt-to-pdf, youtube-to-mp4
+  conversionType: text("conversion_type").notNull(), // pdf-to-txt, txt-to-pdf, youtube-to-mp4, heic-to-png
   status: text("status").notNull().default("pending"), // pending, processing, completed, failed
   filePath: text("file_path"),
   error: text("error"),
   createdAt: text("created_at").notNull().default("NOW()"),
+  originalFileSize: integer("original_file_size"), // Size in bytes
+  convertedFileSize: integer("converted_file_size"), // Size in bytes
+  conversionTimeMs: integer("conversion_time_ms"), // Time in milliseconds
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
