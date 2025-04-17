@@ -1,0 +1,14 @@
+
+YouTube Video Download Notice
+
+Requested URL: https://www.youtube.com/watch?v=GNT7uqpf-bQ
+Video ID: GNT7uqpf-bQ
+Timestamp: 2025-04-17T13:11:49.703Z
+
+Note: Due to YouTube's terms of service and technical limitations, direct video downloads 
+are not available in this demo. In a production environment, you would need to:
+
+1. Use a properly registered and authorized API key with appropriate permissions
+2. Ensure compliance with YouTube's terms of service
+3. Consider implementing a different approach via server-side processing or use a third-party API
+      

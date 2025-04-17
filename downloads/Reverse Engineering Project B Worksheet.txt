@@ -1,5 +1,24 @@
 PDF Document: Reverse Engineering Project B Worksheet.pdf
 Page Count: 3
 
-This is extracted text from your PDF document.
-In a production environment, we would use a more robust PDF text extraction library.
+--- Page 1 ---
+
+Width: 612px, Height: 792px
+Content from page 1:
+This PDF page contains text and potentially other elements like images, tables, etc.
+For improved extraction, consider using a specialized PDF extraction library.
+
+--- Page 2 ---
+
+Width: 612px, Height: 792px
+Content from page 2:
+This PDF page contains text and potentially other elements like images, tables, etc.
+For improved extraction, consider using a specialized PDF extraction library.
+
+--- Page 3 ---
+
+Width: 612px, Height: 792px
+Content from page 3:
+This PDF page contains text and potentially other elements like images, tables, etc.
+For improved extraction, consider using a specialized PDF extraction library.
+

@@ -24,10 +24,17 @@ const ConversionResult: React.FC<ConversionResultProps> = ({
       case 'txt-to-pdf':
         return 'Your TXT file has been converted to PDF successfully.';
       case 'youtube-to-mp4':
-        return 'Your YouTube video has been converted to MP4 successfully.';
+        return 'Your YouTube URL request has been processed. A notice file has been generated.';
       default:
         return 'Your file has been successfully converted.';
     }
+  };
+  
+  const getButtonText = () => {
+    if (conversionType === 'youtube-to-mp4') {
+      return 'Download Notice';
+    }
+    return 'Download File';
   };
 
   return (
@@ -47,7 +54,7 @@ const ConversionResult: React.FC<ConversionResultProps> = ({
             asChild
           >
             <a href={downloadUrl} download={fileName}>
-              <Download className="h-4 w-4" /> Download File
+              <Download className="h-4 w-4" /> {getButtonText()}
             </a>
           </Button>
           <Button 
