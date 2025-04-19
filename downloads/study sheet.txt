@@ -1,0 +1,12 @@
+PDF Document: study sheet.pdf
+Page Count: 1
+
+--- Page 1 ---
+
+Page 1 dimensions: 612px × 792px
+
+--- Content from page 1 ---
+
+[This represents the text content of page 1]
+[Your PDF contains 1 pages of text and potentially other elements]
+
