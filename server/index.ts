@@ -6,6 +6,9 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+app.use('/downloads', express.static('downloads'));
+
+
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
@@ -66,5 +69,5 @@ app.use((req, res, next) => {
   }, () => {
     log(`serving on port ${port}`);
   });
-  
+
 })();
